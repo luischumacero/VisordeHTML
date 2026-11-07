@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1420">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HTML Viewer">
   <title>HTML Viewer</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -15,7 +18,7 @@
         <span>HTML <strong>Viewer</strong></span>
       </a>
       <div class="topbar-actions">
-        <span class="local-status"><span class="status-dot"></span> Archivos en tu dispositivo</span>
+        <span class="local-status" id="local-status"><span class="status-dot"></span><span id="local-status-text">Guardado local disponible</span></span>
         <button class="icon-button" id="help-button" type="button" aria-label="Acerca de HTML Viewer" title="Acerca de HTML Viewer">?</button>
       </div>
     </header>
@@ -29,6 +32,16 @@
           </div>
           <button class="icon-button subtle" id="clear-button" type="button" aria-label="Cerrar proyecto" title="Cerrar proyecto" disabled>×</button>
         </div>
+
+        <section class="saved-projects" aria-label="Proyectos guardados">
+          <div class="saved-projects-heading">
+            <span>PROYECTOS GUARDADOS</span>
+            <span class="saved-project-count" id="saved-project-count">0</span>
+          </div>
+          <div class="saved-project-list" id="saved-project-list" aria-live="polite">
+            <p class="saved-project-empty">Todavía no hay proyectos guardados.</p>
+          </div>
+        </section>
 
         <div class="import-card" id="drop-zone">
           <div class="upload-icon" aria-hidden="true">
@@ -47,7 +60,7 @@
               ZIP
             </button>
           </div>
-          <p class="drop-hint">También puedes arrastrar archivos aquí</p>
+          <p class="drop-hint">Puedes arrastrar archivos aquí. Te preguntaremos antes de guardar.</p>
         </div>
 
         <div class="project-panel hidden" id="project-panel">
@@ -58,6 +71,9 @@
               <span id="project-file-count">0 archivos</span>
             </div>
             <button class="icon-button subtle" id="add-files-button" type="button" aria-label="Añadir archivos" title="Añadir archivos">+</button>
+            <button class="icon-button subtle delete-saved-button" id="delete-saved-button" type="button" aria-label="Borrar proyecto guardado" title="Borrar proyecto de este dispositivo">
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3.5 5.5h13m-11.5 0 .7 11h8.6l.7-11M8 5.5V3.8h4v1.7m-3 3v5m3-5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
           </div>
           <div class="tree-toolbar">
             <span>ARCHIVOS</span>
@@ -84,25 +100,14 @@
             <span class="current-file hidden" id="current-file"></span>
           </div>
           <div class="preview-controls">
-            <div class="device-switch" role="group" aria-label="Tamaño de vista">
-              <button class="device-button" type="button" data-device="mobile" aria-label="Vista móvil" title="Móvil">
-                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="5.75" y="2.5" width="8.5" height="15" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M8.5 15h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              </button>
-              <button class="device-button" type="button" data-device="tablet" aria-label="Vista tablet" title="Tablet">
-                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3.5" y="2.5" width="13" height="15" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M9 15h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              </button>
-              <button class="device-button active" type="button" data-device="desktop" aria-label="Vista escritorio" title="Escritorio">
-                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2.5" y="3" width="15" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M7.5 17h5M10 14v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-              </button>
-            </div>
-            <span class="toolbar-divider"></span>
             <button class="icon-button toolbar-icon" id="reload-button" type="button" aria-label="Volver a ejecutar" title="Volver a ejecutar" disabled>
               <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M16.2 8A6.5 6.5 0 0 0 4.5 6.5L3 8m0 0V4.5M3 8h3.5M3.8 12A6.5 6.5 0 0 0 15.5 13.5L17 12m0 0v3.5m0-3.5h-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            <button class="icon-button toolbar-icon" id="open-new-tab-button" type="button" aria-label="Abrir vista previa en otra pestaña" title="Abrir en otra pestaña" disabled>
+            <button class="button button-secondary preview-window-button" id="open-new-tab-button" type="button" title="Ver el documento solo en otra ventana" disabled>
               <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11 3h6v6m-.5-5.5L9 11m4-1v5.5a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Ver en otra ventana</span>
             </button>
-            <button class="icon-button toolbar-icon" id="fullscreen-button" type="button" aria-label="Abrir documento a pantalla completa" title="Pantalla completa (Esc para salir)" aria-pressed="false" disabled>
+            <button class="icon-button toolbar-icon" id="fullscreen-button" type="button" aria-label="Ver documento en pantalla completa" title="Ver documento en pantalla completa" aria-pressed="false" disabled>
               <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 3H3v4m0-4 5 5m5-5h4v4m0-4-5 5M3 13v4h4m-4 0 5-5m5 5h4v-4m0 4-5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
           </div>
@@ -118,25 +123,18 @@
               </div>
               <div class="spark spark-one">✦</div><div class="spark spark-two">✳</div>
             </div>
-            <p class="eyebrow">TU ESPACIO DE PRUEBAS</p>
-            <h2>Tu próximo proyecto,<br><span>en marcha.</span></h2>
-            <p class="empty-description">Abre un archivo HTML o importa una carpeta / ZIP para empezar a explorar tu proyecto web.</p>
-            <button class="button button-primary" id="empty-open-button" type="button">
-              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 13V3m0 0L6.5 6.5M10 3l3.5 3.5M4 12.5v3A1.5 1.5 0 0 0 5.5 17h9a1.5 1.5 0 0 0 1.5-1.5v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Abrir un proyecto
-            </button>
-            <span class="empty-footnote">100% local · Sin registro ni cargas a servidores</span>
+            <h2>Vista previa</h2>
+            <p class="empty-description">Elige un archivo en el panel izquierdo.</p>
           </div>
-          <div class="frame-wrap device-desktop hidden" id="frame-wrap">
+          <div class="frame-wrap hidden" id="frame-wrap">
             <iframe id="preview-frame" title="Vista previa del proyecto" sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock" allow="fullscreen" referrerpolicy="no-referrer"></iframe>
           </div>
-          <button class="fullscreen-exit" id="exit-fullscreen-button" type="button" aria-label="Volver al visor">
-            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 3H3v4m0-4 5 5m5 5 4 4m0-4v4h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Volver al visor
+          <button class="fullscreen-exit" id="exit-fullscreen-button" type="button" aria-label="Salir de pantalla completa" title="Salir de pantalla completa">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
           </button>
         </div>
 
-        <section class="console-panel" id="console-panel" aria-label="Consola">
+        <section class="console-panel hidden" id="console-panel" aria-label="Consola">
           <div class="console-heading">
             <div class="console-label">
               <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m7 6-4 4 4 4m6-8 4 4-4 4m-1-8-2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -170,7 +168,7 @@
     <div class="dialog-mark">&lt;/&gt;</div>
     <p class="eyebrow">HTML VIEWER</p>
     <h2>Un navegador para tus proyectos.</h2>
-    <p>Importa tus archivos desde tu dispositivo. El contenido se mantiene local y se ejecuta dentro de un iframe aislado. Los enlaces a otras páginas del proyecto se abren en esta vista previa.</p>
+    <p>Importa archivos desde tu dispositivo. Solo se guardará un proyecto si aceptas la confirmación; después podrás abrirlo desde la lista de proyectos guardados.</p>
     <div class="help-note"><span>◇</span> Los proyectos importados pueden ejecutar JavaScript. Abre únicamente archivos en los que confíes.</div>
     <button class="button button-primary dialog-done" id="done-help-button" type="button">Entendido</button>
   </dialog>
@@ -186,9 +184,12 @@
         cssSources: new Map(),
         currentPath: "",
         projectName: "",
+        savedProjectId: "",
+        savedProjects: [],
         consoleCount: 0,
         toastTimer: 0
       };
+      let databasePromise;
 
       const htmlInput = $("#html-input");
       const folderInput = $("#folder-input");
@@ -198,12 +199,239 @@
       const previewFrame = $("#preview-frame");
       const fullscreenButton = $("#fullscreen-button");
       const appShell = $(".app-shell");
+      let previewWindow = null;
+
+      const previewWindowShell = `<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>Vista previa</title>
+  <style>html,body,iframe{width:100%;height:100%;margin:0;border:0}body{overflow:hidden;background:#fff}iframe{display:block}</style>
+</head>
+<body>
+  <iframe title="Vista previa del proyecto" sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock" allow="fullscreen"></iframe>
+`;
 
       function setPreviewFullscreen(enabled) {
         appShell.classList.toggle("preview-fullscreen", enabled);
+        document.body.classList.toggle("preview-fullscreen", enabled);
         fullscreenButton.setAttribute("aria-pressed", String(enabled));
-        fullscreenButton.setAttribute("aria-label", enabled ? "Salir de pantalla completa" : "Ampliar vista previa");
-        fullscreenButton.title = enabled ? "Salir de pantalla completa" : "Ampliar vista previa";
+        fullscreenButton.setAttribute("aria-label", enabled ? "Salir de pantalla completa" : "Ver documento en pantalla completa");
+        fullscreenButton.title = enabled ? "Salir de pantalla completa" : "Ver documento en pantalla completa";
+      }
+
+      async function exitNativeFullscreen() {
+        if (!document.fullscreenElement || !document.exitFullscreen) return;
+        try {
+          await document.exitFullscreen();
+        } catch (error) {
+          showToast(`No se pudo salir de pantalla completa: ${error.message || error}`, true);
+        }
+      }
+
+      function updateLocalStatus(message) {
+        $("#local-status-text").textContent = message;
+      }
+
+      function openPreviewWindow() {
+        const target = window.open("", "htmlViewerPreview");
+        if (!target) {
+          showToast("Safari bloqueó la ventana. Permite ventanas emergentes e inténtalo de nuevo.", true);
+          return null;
+        }
+        previewWindow = target;
+        target.document.open();
+        target.document.write(previewWindowShell);
+        target.document.close();
+        const frame = target.document.querySelector("iframe");
+        target.addEventListener("message", (event) => {
+          if (event.source === window && event.data && event.data.__htmlViewerHost === true && event.data.type === "load" && typeof event.data.html === "string") {
+            target.document.title = event.data.title || "Vista previa";
+            frame.srcdoc = event.data.html;
+            return;
+          }
+          if (event.source === frame.contentWindow && event.data && event.data.__htmlViewer === true) {
+            handlePreviewMessage(event.source, event.data);
+          }
+        });
+        return target;
+      }
+
+      function sendPreviewToWindow(path, html) {
+        if (!previewWindow || previewWindow.closed) {
+          previewWindow = null;
+          return;
+        }
+        const file = state.files.get(path);
+        previewWindow.postMessage({
+          __htmlViewerHost: true,
+          type: "load",
+          title: file ? file.name : path,
+          html
+        }, "*");
+      }
+
+      function openProjectDatabase() {
+        if (!window.indexedDB) throw new Error("Este navegador no permite guardar proyectos localmente.");
+        if (!databasePromise) {
+          databasePromise = new Promise((resolve, reject) => {
+            const request = indexedDB.open("html-viewer-local", 1);
+            request.onupgradeneeded = () => {
+              if (!request.result.objectStoreNames.contains("projects")) {
+                request.result.createObjectStore("projects");
+              }
+            };
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error || new Error("No se pudo abrir el almacenamiento local."));
+            request.onblocked = () => reject(new Error("Cierra otras pestañas del visor e inténtalo de nuevo."));
+          });
+        }
+        return databasePromise;
+      }
+
+      async function readSavedProjects() {
+        const database = await openProjectDatabase();
+        return new Promise((resolve, reject) => {
+          const transaction = database.transaction("projects", "readonly");
+          const store = transaction.objectStore("projects");
+          let keys = [];
+          let records = [];
+          const keysRequest = store.getAllKeys();
+          const recordsRequest = store.getAll();
+          keysRequest.onsuccess = () => { keys = keysRequest.result; };
+          recordsRequest.onsuccess = () => { records = recordsRequest.result; };
+          transaction.oncomplete = () => resolve(records.map((record, index) => ({
+            ...record,
+            id: record.id || String(keys[index])
+          })).filter((record) => Array.isArray(record.files)));
+          transaction.onerror = () => reject(transaction.error || new Error("No se pudieron leer los proyectos guardados."));
+          transaction.onabort = () => reject(transaction.error || new Error("No se pudieron leer los proyectos guardados."));
+        });
+      }
+
+      async function persistProject() {
+        const id = state.savedProjectId;
+        const record = {
+          id,
+          name: state.projectName,
+          currentPath: state.currentPath,
+          savedAt: Date.now(),
+          files: [...state.files.entries()].map(([path, file]) => ({
+            path,
+            name: file.name,
+            type: file.type,
+            lastModified: file.lastModified,
+            blob: file.slice(0, file.size, file.type)
+          }))
+        };
+        updateLocalStatus("Guardando proyecto…");
+        try {
+          const database = await openProjectDatabase();
+          await new Promise((resolve, reject) => {
+            const transaction = database.transaction("projects", "readwrite");
+            transaction.objectStore("projects").put(record, id);
+            transaction.oncomplete = resolve;
+            transaction.onerror = () => reject(transaction.error || new Error("No se pudo guardar el proyecto."));
+            transaction.onabort = () => reject(transaction.error || new Error("No se pudo guardar el proyecto."));
+          });
+          await loadSavedProjects();
+          showToast(`Se guardó “${state.projectName}” en este dispositivo.`);
+        } catch (error) {
+          updateLocalStatus("No se pudo guardar el proyecto");
+          showToast(`No se pudo guardar en este dispositivo: ${error.message || error}`, true);
+        }
+      }
+
+      async function deleteSavedProject(id) {
+        const database = await openProjectDatabase();
+        await new Promise((resolve, reject) => {
+          const transaction = database.transaction("projects", "readwrite");
+          transaction.objectStore("projects").delete(id);
+          transaction.oncomplete = resolve;
+          transaction.onerror = () => reject(transaction.error || new Error("No se pudo borrar el proyecto guardado."));
+          transaction.onabort = () => reject(transaction.error || new Error("No se pudo borrar el proyecto guardado."));
+        });
+      }
+
+      function createProjectId() {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
+        return `project-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      }
+
+      function askToSaveProject() {
+        const updating = Boolean(state.savedProjectId);
+        const action = updating ? "actualizar este proyecto" : "guardar este proyecto";
+        if (!window.confirm(`¿Quieres ${action} en este dispositivo para volver a abrirlo después?`)) {
+          state.savedProjectId = "";
+          $("#delete-saved-button").classList.add("hidden");
+          renderSavedProjects();
+          updateLocalStatus("Proyecto no guardado");
+          return;
+        }
+        if (!state.savedProjectId) state.savedProjectId = createProjectId();
+        $("#delete-saved-button").classList.remove("hidden");
+        persistProject();
+      }
+
+      function renderSavedProjects() {
+        const list = $("#saved-project-list");
+        list.replaceChildren();
+        $("#saved-project-count").textContent = String(state.savedProjects.length);
+        if (!state.savedProjects.length) {
+          const empty = document.createElement("p");
+          empty.className = "saved-project-empty";
+          empty.textContent = "Todavía no hay proyectos guardados.";
+          list.append(empty);
+          return;
+        }
+        for (const project of state.savedProjects) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "saved-project-button";
+          button.classList.toggle("selected", project.id === state.savedProjectId);
+          button.setAttribute("aria-label", `Abrir ${project.name}, ${project.files.length} archivos guardados`);
+          const name = document.createElement("strong");
+          name.textContent = project.name || "Proyecto";
+          const detail = document.createElement("span");
+          detail.textContent = `${project.files.length} ${project.files.length === 1 ? "archivo" : "archivos"}`;
+          button.append(name, detail);
+          button.addEventListener("click", () => openSavedProject(project));
+          list.append(button);
+        }
+      }
+
+      async function loadSavedProjects() {
+        updateLocalStatus("Buscando proyecto guardado…");
+        try {
+          state.savedProjects = (await readSavedProjects()).sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+          renderSavedProjects();
+          const count = state.savedProjects.length;
+          updateLocalStatus(count ? `${count} ${count === 1 ? "proyecto guardado" : "proyectos guardados"}` : "Sin proyectos guardados");
+        } catch (error) {
+          updateLocalStatus("No se pudieron cargar los proyectos");
+          showToast(`No se pudieron cargar los proyectos guardados: ${error.message || error}`, true);
+        }
+      }
+
+      function openSavedProject(saved) {
+        const files = saved.files.map((entry) => ({
+            path: entry.path,
+            file: new File([entry.blob], entry.name, {
+              type: entry.type || mimeType(entry.path),
+              lastModified: entry.lastModified
+            })
+          }));
+          if (!files.length) {
+            showToast("El proyecto guardado no contiene archivos.", true);
+            return;
+          }
+        startProject(files, saved.name, saved.currentPath || "", {
+          askToSave: false,
+          savedProjectId: saved.id
+        });
+        showToast(`Se abrió “${saved.name || "Proyecto"}” desde los guardados.`);
       }
 
       function showToast(message, isError = false) {
@@ -246,10 +474,15 @@
         return state.assetUrls.get(normalizePath(path)) || "";
       }
 
-      function startProject(files, name, preferredPath = "") {
+      function startProject(files, name, preferredPath = "", options = {}) {
         state.files.clear();
         clearAssetUrls();
-        for (const file of files) addFile(file);
+        state.savedProjectId = options.savedProjectId || "";
+        $("#delete-saved-button").classList.toggle("hidden", !state.savedProjectId);
+        for (const entry of files) {
+          if (entry && entry.file instanceof File && entry.path) addFile(entry.file, entry.path);
+          else addFile(entry);
+        }
         if (!state.files.size) {
           showToast("No se encontraron archivos en la selección.", true);
           return;
@@ -271,6 +504,8 @@
           updateCurrentFile();
           showToast("Proyecto cargado. No se encontró ningún archivo HTML.", true);
         }
+        if (options.askToSave !== false) askToSaveProject();
+        renderSavedProjects();
       }
 
       function renderTree() {
@@ -373,12 +608,14 @@
 
       function clearConsole() {
         state.consoleCount = 0;
+        $("#console-panel").classList.add("hidden");
         $("#console-entries").replaceChildren();
         $("#console-empty").classList.remove("hidden");
         $("#error-count").classList.add("hidden");
       }
 
       function appendConsole(type, message, source = "") {
+        $("#console-panel").classList.remove("hidden");
         const row = document.createElement("div");
         row.className = `console-entry ${type === "error" ? "entry-error" : type === "warn" ? "entry-warn" : "entry-info"}`;
         const marker = document.createElement("span");
@@ -491,7 +728,10 @@
         const bridge = parsed.createElement("script");
         bridge.textContent = `
           (() => {
-            const report = (type, message, source) => parent.postMessage({ __htmlViewer: true, type, message: String(message), source: source || "" }, "*");
+            const report = (type, message, source) => {
+              const receiver = window.parent !== window ? window.parent : window.opener;
+              if (receiver) receiver.postMessage({ __htmlViewer: true, type, message: String(message), source: source || "" }, "*");
+            };
             window.addEventListener("error", event => {
               if (event.target && event.target !== window) {
                 const target = event.target;
@@ -507,7 +747,8 @@
               const link = event.target.closest && event.target.closest("a[data-viewer-page]");
               if (!link) return;
               event.preventDefault();
-              parent.postMessage({ __htmlViewer: true, type: "navigate", path: link.getAttribute("data-viewer-page") }, "*");
+              const receiver = window.parent !== window ? window.parent : window.opener;
+              if (receiver) receiver.postMessage({ __htmlViewer: true, type: "navigate", path: link.getAttribute("data-viewer-page") }, "*");
             }, true);
           })();
         `;
@@ -541,7 +782,9 @@
         $("#preview-stage").classList.add("has-preview");
         try {
           await prepareStylesheets();
-          previewFrame.srcdoc = await createPreviewDocument(cleanPath);
+          const html = await createPreviewDocument(cleanPath);
+          previewFrame.srcdoc = html;
+          sendPreviewToWindow(cleanPath, html);
         } catch (error) {
           appendConsole("error", `No se pudo abrir ${cleanPath}: ${error.message || error}`);
           showToast("No se pudo preparar la vista previa.", true);
@@ -641,6 +884,8 @@
         state.cssSources.clear();
         state.currentPath = "";
         state.projectName = "";
+        state.savedProjectId = "";
+        $("#delete-saved-button").classList.add("hidden");
         previewFrame.srcdoc = "";
         $("#project-panel").classList.add("hidden");
         $("#drop-zone").classList.remove("hidden");
@@ -653,6 +898,7 @@
         $("#preview-stage").classList.remove("has-preview");
         updateCurrentFile();
         clearConsole();
+        renderSavedProjects();
       }
 
       function importInputFiles(files, name) {
@@ -663,7 +909,6 @@
       }
 
       $("#open-html-button").addEventListener("click", () => htmlInput.click());
-      $("#empty-open-button").addEventListener("click", () => htmlInput.click());
       $("#open-folder-button").addEventListener("click", () => folderInput.click());
       $("#open-zip-button").addEventListener("click", () => zipInput.click());
       $("#add-files-button").addEventListener("click", () => addInput.click());
@@ -671,11 +916,52 @@
       $("#refresh-tree-button").addEventListener("click", renderTree);
       $("#reload-button").addEventListener("click", () => state.currentPath && runFile(state.currentPath));
       $("#clear-console-button").addEventListener("click", clearConsole);
-      fullscreenButton.addEventListener("click", () => setPreviewFullscreen(true));
-      $("#exit-fullscreen-button").addEventListener("click", () => setPreviewFullscreen(false));
+      fullscreenButton.addEventListener("click", async () => {
+        if (appShell.classList.contains("preview-fullscreen")) {
+          setPreviewFullscreen(false);
+          await exitNativeFullscreen();
+          return;
+        }
+        if (appShell.requestFullscreen) {
+          try {
+            await appShell.requestFullscreen();
+            setPreviewFullscreen(true);
+            return;
+          } catch {
+            showToast("Safari no permitió ocultar sus controles; se abrirá la vista ampliada.");
+          }
+        }
+        setPreviewFullscreen(true);
+      });
+      $("#exit-fullscreen-button").addEventListener("click", async () => {
+        setPreviewFullscreen(false);
+        await exitNativeFullscreen();
+      });
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && appShell.classList.contains("preview-fullscreen")) {
           setPreviewFullscreen(false);
+        }
+      });
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement) setPreviewFullscreen(false);
+      });
+      $("#delete-saved-button").addEventListener("click", async () => {
+        const savedProjectId = state.savedProjectId;
+        if (!savedProjectId) return;
+        if (!window.confirm("¿Borrar este proyecto y sus archivos guardados de este dispositivo?")) return;
+        const deleteButton = $("#delete-saved-button");
+        deleteButton.disabled = true;
+        try {
+          await deleteSavedProject(savedProjectId);
+          state.savedProjectId = "";
+          deleteButton.classList.add("hidden");
+          await loadSavedProjects();
+          renderSavedProjects();
+          showToast("Se borró el proyecto guardado de este dispositivo. Los archivos siguen abiertos.");
+        } catch (error) {
+          showToast(`No se pudo borrar el proyecto guardado: ${error.message || error}`, true);
+        } finally {
+          deleteButton.disabled = false;
         }
       });
 
@@ -703,7 +989,7 @@
             if (file.webkitRelativePath) return file;
             Object.defineProperty(file, "webkitRelativePath", { value: path, configurable: true });
             return file;
-          }), state.projectName || "Proyecto", preferred);
+          }), state.projectName || "Proyecto", preferred, { savedProjectId: state.savedProjectId });
         }
         addInput.value = "";
       });
@@ -728,23 +1014,16 @@
         else if (files.length) importInputFiles(files, "Proyecto");
       });
 
-      window.addEventListener("message", (event) => {
-        if (event.source !== previewFrame.contentWindow || !event.data || event.data.__htmlViewer !== true) return;
-        const data = event.data;
+      function handlePreviewMessage(source, data) {
+        if ((source !== previewFrame.contentWindow && (!previewWindow || source !== previewWindow.document.querySelector("iframe")?.contentWindow)) || !data || data.__htmlViewer !== true) return;
         if (data.type === "navigate") {
           runFile(data.path);
           return;
         }
         appendConsole(data.type || "info", data.message || "Error desconocido", data.source || "");
-      });
-
-      for (const button of document.querySelectorAll(".device-button")) {
-        button.addEventListener("click", () => {
-          for (const other of document.querySelectorAll(".device-button")) other.classList.toggle("active", other === button);
-          $("#frame-wrap").classList.remove("device-mobile", "device-tablet", "device-desktop");
-          $("#frame-wrap").classList.add(`device-${button.dataset.device}`);
-        });
       }
+
+      window.addEventListener("message", (event) => handlePreviewMessage(event.source, event.data));
 
       $("#console-toggle").addEventListener("click", () => {
         const panel = $("#console-panel");
@@ -757,12 +1036,13 @@
       $("#open-new-tab-button").addEventListener("click", async () => {
         if (!state.currentPath) return;
         try {
-          const html = await createPreviewDocument(state.currentPath);
-          const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
-          window.open(url, "_blank", "noopener");
-          window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+          const target = openPreviewWindow();
+          if (target) {
+            const html = await createPreviewDocument(state.currentPath);
+            sendPreviewToWindow(state.currentPath, html);
+          }
         } catch (error) {
-          showToast(`No se pudo abrir otra pestaña: ${error.message || error}`, true);
+          showToast(`No se pudo mostrar la vista en otra ventana: ${error.message || error}`, true);
         }
       });
 
@@ -774,6 +1054,7 @@
         if (event.target === helpDialog) helpDialog.close();
       });
 
+      loadSavedProjects();
     })();
   </script>
 </body>
