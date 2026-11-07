@@ -130,6 +130,10 @@
           <div class="frame-wrap device-desktop hidden" id="frame-wrap">
             <iframe id="preview-frame" title="Vista previa del proyecto" sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock" allow="fullscreen" referrerpolicy="no-referrer"></iframe>
           </div>
+          <button class="fullscreen-exit" id="exit-fullscreen-button" type="button" aria-label="Volver al visor">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 3H3v4m0-4 5 5m5 5 4 4m0-4v4h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Volver al visor
+          </button>
         </div>
 
         <section class="console-panel" id="console-panel" aria-label="Consola">
@@ -193,6 +197,14 @@
       const fileTree = $("#file-tree");
       const previewFrame = $("#preview-frame");
       const fullscreenButton = $("#fullscreen-button");
+      const appShell = $(".app-shell");
+
+      function setPreviewFullscreen(enabled) {
+        appShell.classList.toggle("preview-fullscreen", enabled);
+        fullscreenButton.setAttribute("aria-pressed", String(enabled));
+        fullscreenButton.setAttribute("aria-label", enabled ? "Salir de pantalla completa" : "Ampliar vista previa");
+        fullscreenButton.title = enabled ? "Salir de pantalla completa" : "Ampliar vista previa";
+      }
 
       function showToast(message, isError = false) {
         const toast = $("#toast");
@@ -623,6 +635,7 @@
       }
 
       function resetProject() {
+        setPreviewFullscreen(false);
         clearAssetUrls();
         state.files.clear();
         state.cssSources.clear();
@@ -658,26 +671,12 @@
       $("#refresh-tree-button").addEventListener("click", renderTree);
       $("#reload-button").addEventListener("click", () => state.currentPath && runFile(state.currentPath));
       $("#clear-console-button").addEventListener("click", clearConsole);
-      fullscreenButton.addEventListener("click", async () => {
-        try {
-          if (document.fullscreenElement) {
-            await document.exitFullscreen();
-            return;
-          }
-          if (typeof previewFrame.requestFullscreen !== "function") {
-            showToast("Tu navegador no admite la vista a pantalla completa.", true);
-            return;
-          }
-          await previewFrame.requestFullscreen();
-        } catch (error) {
-          showToast(`No se pudo abrir la pantalla completa: ${error.message || error}`, true);
+      fullscreenButton.addEventListener("click", () => setPreviewFullscreen(true));
+      $("#exit-fullscreen-button").addEventListener("click", () => setPreviewFullscreen(false));
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && appShell.classList.contains("preview-fullscreen")) {
+          setPreviewFullscreen(false);
         }
-      });
-      document.addEventListener("fullscreenchange", () => {
-        const isFullscreen = document.fullscreenElement === previewFrame;
-        fullscreenButton.setAttribute("aria-pressed", String(isFullscreen));
-        fullscreenButton.setAttribute("aria-label", isFullscreen ? "Salir de pantalla completa" : "Abrir documento a pantalla completa");
-        fullscreenButton.title = isFullscreen ? "Salir de pantalla completa (Esc)" : "Pantalla completa (Esc para salir)";
       });
 
       htmlInput.addEventListener("change", () => {

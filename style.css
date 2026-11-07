@@ -333,4 +333,22 @@ button:focus-visible, a:focus-visible { outline-color: #22d3ee; }
 .help-dialog > p:not(.eyebrow), .help-note { color: #a9bbce; }
 .help-note { background: #142235; }
 .help-note span { color: #34d399; }
-#preview-frame:fullscreen { width: 100vw; height: 100vh; min-height: 0; border: 0; background: #fff; }
+.fullscreen-exit { display: none; }
+.app-shell.preview-fullscreen { position: fixed; z-index: 100; inset: 0; width: 100%; height: 100vh; height: 100dvh; min-height: 0; background: #fff; }
+.preview-fullscreen .topbar,
+.preview-fullscreen .sidebar,
+.preview-fullscreen .preview-toolbar,
+.preview-fullscreen .console-panel { display: none; }
+.preview-fullscreen .workspace,
+.preview-fullscreen .preview-area { width: 100%; height: 100%; min-height: 0; }
+.preview-fullscreen .preview-stage,
+.preview-fullscreen .preview-stage.has-preview { position: fixed; z-index: 101; inset: 0; width: 100%; height: 100vh; height: 100dvh; min-height: 0; padding: 0; overflow: hidden; border: 0; border-radius: 0; background: #fff; background-image: none; }
+.preview-fullscreen .frame-wrap,
+.preview-fullscreen .frame-wrap.device-mobile,
+.preview-fullscreen .frame-wrap.device-tablet,
+.preview-fullscreen .frame-wrap.device-desktop { position: absolute; inset: 0; width: auto; height: 100%; max-height: none; min-height: 0; margin: 0; flex: none; overflow: hidden; border: 0; border-radius: 0; box-shadow: none; }
+.preview-fullscreen .frame-wrap iframe,
+.preview-fullscreen .frame-wrap.device-mobile iframe,
+.preview-fullscreen .frame-wrap.device-tablet iframe { width: 100%; height: 100%; min-height: 0; border: 0; border-radius: 0; }
+.preview-fullscreen .fullscreen-exit { position: fixed; z-index: 102; top: calc(env(safe-area-inset-top, 0px) + 12px); right: calc(env(safe-area-inset-right, 0px) + 12px); display: inline-flex; min-height: 40px; align-items: center; justify-content: center; gap: 7px; padding: 0 12px; border: 1px solid #ffffff40; border-radius: 9px; color: #fff; background: #0b1420d9; box-shadow: 0 2px 12px #00000030; font: 600 12px/1 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; cursor: pointer; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.preview-fullscreen .fullscreen-exit svg { width: 16px; height: 16px; }
