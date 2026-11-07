@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f7fb">
+  <title>HTML Viewer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="HTML Viewer, inicio">
+        <span class="brand-mark" aria-hidden="true">&lt;/&gt;</span>
+        <span>HTML <strong>Viewer</strong></span>
+      </a>
+      <div class="topbar-actions">
+        <span class="local-status"><span class="status-dot"></span> Archivos en tu dispositivo</span>
+        <button class="icon-button" id="help-button" type="button" aria-label="Acerca de HTML Viewer" title="Acerca de HTML Viewer">?</button>
+      </div>
+    </header>
+
+    <section class="workspace" aria-label="Espacio de trabajo">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-heading">
+          <div>
+            <p class="eyebrow">ESPACIO DE TRABAJO</p>
+            <h1>Tu proyecto</h1>
+          </div>
+          <button class="icon-button subtle" id="clear-button" type="button" aria-label="Cerrar proyecto" title="Cerrar proyecto" disabled>×</button>
+        </div>
+
+        <div class="import-card" id="drop-zone">
+          <div class="upload-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h2>Abre tus archivos</h2>
+          <p>Selecciona un HTML o carga un proyecto completo.</p>
+          <button class="button button-primary import-main" id="open-html-button" type="button">Elegir archivo HTML</button>
+          <div class="import-options">
+            <button class="button button-secondary" id="open-folder-button" type="button">
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M2.5 5.5A1.5 1.5 0 0 1 4 4h4l1.5 1.5H16A1.5 1.5 0 0 1 17.5 7v7A1.5 1.5 0 0 1 16 15.5H4A1.5 1.5 0 0 1 2.5 14V5.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+              Carpeta
+            </button>
+            <button class="button button-secondary" id="open-zip-button" type="button">
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 2.75h6l4 4V16a1.25 1.25 0 0 1-1.25 1.25h-7.5A1.25 1.25 0 0 1 5 16V2.75Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11 3v4h4M9 8h2m-2 2h2m-2 2h2m-1 0v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              ZIP
+            </button>
+          </div>
+          <p class="drop-hint">También puedes arrastrar archivos aquí</p>
+        </div>
+
+        <div class="project-panel hidden" id="project-panel">
+          <div class="project-summary">
+            <span class="project-folder-icon" aria-hidden="true">⌁</span>
+            <div class="project-summary-copy">
+              <strong id="project-name">Proyecto</strong>
+              <span id="project-file-count">0 archivos</span>
+            </div>
+            <button class="icon-button subtle" id="add-files-button" type="button" aria-label="Añadir archivos" title="Añadir archivos">+</button>
+          </div>
+          <div class="tree-toolbar">
+            <span>ARCHIVOS</span>
+            <button class="text-button" id="refresh-tree-button" type="button" title="Actualizar lista">Actualizar</button>
+          </div>
+          <div class="file-tree" id="file-tree" role="tree" aria-label="Archivos del proyecto"></div>
+          <div class="sidebar-footnote">
+            <span class="shield-icon" aria-hidden="true">◇</span>
+            <span>El proyecto se procesa localmente. El código se ejecuta en una vista previa aislada.</span>
+          </div>
+        </div>
+
+        <div class="sidebar-bottom">
+          <span class="keyboard-hint">Compatible con HTML, CSS, JS, imágenes y fuentes</span>
+          <span class="version-label">HTML VIEWER <span>·</span> LOCAL</span>
+        </div>
+      </aside>
+
+      <section class="preview-area" aria-label="Vista previa">
+        <div class="preview-toolbar">
+          <div class="preview-title">
+            <span class="preview-live-dot" aria-hidden="true"></span>
+            <span>Vista previa</span>
+            <span class="current-file hidden" id="current-file"></span>
+          </div>
+          <div class="preview-controls">
+            <div class="device-switch" role="group" aria-label="Tamaño de vista">
+              <button class="device-button" type="button" data-device="mobile" aria-label="Vista móvil" title="Móvil">
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="5.75" y="2.5" width="8.5" height="15" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M8.5 15h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </button>
+              <button class="device-button" type="button" data-device="tablet" aria-label="Vista tablet" title="Tablet">
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3.5" y="2.5" width="13" height="15" rx="1.8" stroke="currentColor" stroke-width="1.4"/><path d="M9 15h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </button>
+              <button class="device-button active" type="button" data-device="desktop" aria-label="Vista escritorio" title="Escritorio">
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="2.5" y="3" width="15" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M7.5 17h5M10 14v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <span class="toolbar-divider"></span>
+            <button class="icon-button toolbar-icon" id="reload-button" type="button" aria-label="Volver a ejecutar" title="Volver a ejecutar" disabled>
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M16.2 8A6.5 6.5 0 0 0 4.5 6.5L3 8m0 0V4.5M3 8h3.5M3.8 12A6.5 6.5 0 0 0 15.5 13.5L17 12m0 0v3.5m0-3.5h-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="icon-button toolbar-icon" id="open-new-tab-button" type="button" aria-label="Abrir vista previa en otra pestaña" title="Abrir en otra pestaña" disabled>
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11 3h6v6m-.5-5.5L9 11m4-1v5.5a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="preview-stage" id="preview-stage">
+          <div class="empty-state" id="empty-state">
+            <div class="empty-illustration" aria-hidden="true">
+              <div class="illustration-window">
+                <div class="illustration-chrome"><i></i><i></i><i></i><span></span></div>
+                <div class="illustration-code"><b></b><b></b><b></b><b></b></div>
+                <div class="illustration-card"><span></span><i></i><i></i></div>
+              </div>
+              <div class="spark spark-one">✦</div><div class="spark spark-two">✳</div>
+            </div>
+            <p class="eyebrow">TU ESPACIO DE PRUEBAS</p>
+            <h2>Tu próximo proyecto,<br><span>en marcha.</span></h2>
+            <p class="empty-description">Abre un archivo HTML o importa una carpeta / ZIP para empezar a explorar tu proyecto web.</p>
+            <button class="button button-primary" id="empty-open-button" type="button">
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 13V3m0 0L6.5 6.5M10 3l3.5 3.5M4 12.5v3A1.5 1.5 0 0 0 5.5 17h9a1.5 1.5 0 0 0 1.5-1.5v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Abrir un proyecto
+            </button>
+            <span class="empty-footnote">100% local · Sin registro ni cargas a servidores</span>
+          </div>
+          <div class="frame-wrap device-desktop hidden" id="frame-wrap">
+            <iframe id="preview-frame" title="Vista previa del proyecto" sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock" referrerpolicy="no-referrer"></iframe>
+          </div>
+        </div>
+
+        <section class="console-panel" id="console-panel" aria-label="Consola">
+          <div class="console-heading">
+            <div class="console-label">
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m7 6-4 4 4 4m6-8 4 4-4 4m-1-8-2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Consola</span>
+              <span class="error-count hidden" id="error-count">0</span>
+            </div>
+            <div class="console-actions">
+              <button class="text-button" id="clear-console-button" type="button">Limpiar</button>
+              <button class="icon-button console-collapse" id="console-toggle" type="button" aria-label="Contraer consola" title="Contraer consola">
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 12 5-5 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="console-content" id="console-content">
+            <div class="console-empty" id="console-empty"><span class="console-check">✓</span> Los errores de JavaScript y carga aparecerán aquí.</div>
+            <div class="console-entries" id="console-entries" role="log" aria-live="polite"></div>
+          </div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <input id="html-input" class="visually-hidden" type="file" accept=".html,.htm,text/html">
+  <input id="folder-input" class="visually-hidden" type="file" webkitdirectory directory multiple>
+  <input id="zip-input" class="visually-hidden" type="file" accept=".zip,application/zip">
+  <input id="add-input" class="visually-hidden" type="file" multiple>
+  <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog class="help-dialog" id="help-dialog">
+    <button class="icon-button dialog-close" id="close-help-button" type="button" aria-label="Cerrar">×</button>
+    <div class="dialog-mark">&lt;/&gt;</div>
+    <p class="eyebrow">HTML VIEWER</p>
+    <h2>Un navegador para tus proyectos.</h2>
+    <p>Importa tus archivos desde tu dispositivo. El contenido se mantiene local y se ejecuta dentro de un iframe aislado. Los enlaces a otras páginas del proyecto se abren en esta vista previa.</p>
+    <div class="help-note"><span>◇</span> Los proyectos importados pueden ejecutar JavaScript. Abre únicamente archivos en los que confíes.</div>
+    <button class="button button-primary dialog-done" id="done-help-button" type="button">Entendido</button>
+  </dialog>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const $ = (selector) => document.querySelector(selector);
+      const state = {
+        files: new Map(),
+        assetUrls: new Map(),
+        cssSources: new Map(),
+        currentPath: "",
+        projectName: "",
+        consoleCount: 0,
+        toastTimer: 0
+      };
+
+      const htmlInput = $("#html-input");
+      const folderInput = $("#folder-input");
+      const zipInput = $("#zip-input");
+      const addInput = $("#add-input");
+      const fileTree = $("#file-tree");
+      const previewFrame = $("#preview-frame");
+
+      function showToast(message, isError = false) {
+        const toast = $("#toast");
+        toast.textContent = message;
+        toast.classList.toggle("toast-error", isError);
+        toast.classList.remove("hidden");
+        window.clearTimeout(state.toastTimer);
+        state.toastTimer = window.setTimeout(() => toast.classList.add("hidden"), 3600);
+      }
+
+      function normalizePath(path) {
+        const parts = [];
+        for (const part of String(path).replace(/\\/g, "/").split("/")) {
+          if (!part || part === ".") continue;
+          if (part === "..") parts.pop();
+          else parts.push(part);
+        }
+        return parts.join("/");
+      }
+
+      function relativePath(file) {
+        return normalizePath(file.webkitRelativePath || file.name);
+      }
+
+      function isHtml(path) {
+        return /\.html?$/i.test(path);
+      }
+
+      function clearAssetUrls() {
+        state.assetUrls.clear();
+      }
+
+      function addFile(file, path = relativePath(file)) {
+        const cleanPath = normalizePath(path);
+        if (cleanPath) state.files.set(cleanPath, file);
+      }
+
+      function getAssetUrl(path) {
+        return state.assetUrls.get(normalizePath(path)) || "";
+      }
+
+      function startProject(files, name, preferredPath = "") {
+        state.files.clear();
+        clearAssetUrls();
+        for (const file of files) addFile(file);
+        if (!state.files.size) {
+          showToast("No se encontraron archivos en la selección.", true);
+          return;
+        }
+        state.projectName = name || "Proyecto";
+        const firstHtml = [...state.files.keys()].find((path) => isHtml(path));
+        const selectedPath = state.files.has(normalizePath(preferredPath)) && isHtml(preferredPath)
+          ? normalizePath(preferredPath)
+          : firstHtml;
+        $("#project-name").textContent = state.projectName;
+        $("#project-file-count").textContent = `${state.files.size} ${state.files.size === 1 ? "archivo" : "archivos"}`;
+        $("#project-panel").classList.remove("hidden");
+        $("#drop-zone").classList.add("hidden");
+        $("#clear-button").disabled = false;
+        renderTree();
+        if (selectedPath) runFile(selectedPath);
+        else {
+          state.currentPath = "";
+          updateCurrentFile();
+          showToast("Proyecto cargado. No se encontró ningún archivo HTML.", true);
+        }
+      }
+
+      function renderTree() {
+        fileTree.replaceChildren();
+        const sortedPaths = [...state.files.keys()].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }));
+        const root = document.createElement("ul");
+        root.className = "tree-list";
+        const branch = (container, paths, prefix = "") => {
+          const children = new Map();
+          for (const path of paths) {
+            const rest = prefix ? path.slice(prefix.length + 1) : path;
+            const [head, ...tail] = rest.split("/");
+            if (!children.has(head)) children.set(head, []);
+            if (tail.length) children.get(head).push(path);
+          }
+          for (const [name, nested] of [...children.entries()].sort(([a], [b]) => {
+            const aDir = nestedHasDirectory(a, paths, prefix);
+            const bDir = nestedHasDirectory(b, paths, prefix);
+            return aDir === bDir ? a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }) : aDir ? -1 : 1;
+          })) {
+            const fullPath = prefix ? `${prefix}/${name}` : name;
+            const item = document.createElement("li");
+            if (nested.length) {
+              const row = document.createElement("button");
+              row.type = "button";
+              row.className = "tree-row folder-row";
+              row.setAttribute("aria-expanded", "true");
+              row.innerHTML = `<span class="tree-caret">⌄</span><span class="tree-icon folder-icon">▰</span><span class="tree-name"></span>`;
+              row.querySelector(".tree-name").textContent = name;
+              const nestedList = document.createElement("ul");
+              nestedList.className = "tree-list nested-list";
+              branch(nestedList, nested, fullPath);
+              row.addEventListener("click", () => {
+                const expanded = row.getAttribute("aria-expanded") === "true";
+                row.setAttribute("aria-expanded", String(!expanded));
+                nestedList.classList.toggle("collapsed", expanded);
+              });
+              item.append(row, nestedList);
+            } else {
+              const row = document.createElement("button");
+              row.type = "button";
+              row.className = "tree-row file-row";
+              row.dataset.path = fullPath;
+              row.setAttribute("role", "treeitem");
+              const icon = document.createElement("span");
+              icon.className = `tree-icon file-icon${isHtml(fullPath) ? " html-icon" : ""}`;
+              icon.textContent = fileGlyph(fullPath);
+              const label = document.createElement("span");
+              label.className = "tree-name";
+              label.textContent = name;
+              row.append(icon, label);
+              row.addEventListener("click", () => {
+                if (isHtml(fullPath)) runFile(fullPath);
+                else showToast(isPreviewable(fullPath) ? "Este recurso se abrirá desde el HTML que lo utiliza." : "Selecciona un archivo HTML para iniciar la vista previa.");
+              });
+              item.append(row);
+            }
+            container.append(item);
+          }
+        };
+        function nestedHasDirectory(name, paths, prefix) {
+          const full = prefix ? `${prefix}/${name}` : name;
+          return paths.some((path) => path.startsWith(`${full}/`));
+        }
+        branch(root, sortedPaths);
+        fileTree.append(root);
+        updateTreeSelection();
+      }
+
+      function fileGlyph(path) {
+        const ext = path.split(".").pop().toLowerCase();
+        if (isHtml(path)) return "◇";
+        if (ext === "css") return "#";
+        if (["js", "mjs", "cjs"].includes(ext)) return "JS";
+        if (["png", "jpg", "jpeg", "gif", "webp", "svg", "ico", "avif"].includes(ext)) return "▧";
+        if (["woff", "woff2", "ttf", "otf"].includes(ext)) return "Aa";
+        return "·";
+      }
+
+      function isPreviewable(path) {
+        return /\.(?:css|js|mjs|cjs|png|jpe?g|gif|webp|svg|ico|avif|woff2?|ttf|otf)$/i.test(path);
+      }
+
+      function updateTreeSelection() {
+        for (const row of fileTree.querySelectorAll(".file-row")) {
+          const selected = row.dataset.path === state.currentPath;
+          row.classList.toggle("selected", selected);
+          row.setAttribute("aria-selected", String(selected));
+        }
+      }
+
+      function updateCurrentFile() {
+        const current = $("#current-file");
+        if (state.currentPath) {
+          current.textContent = state.currentPath;
+          current.classList.remove("hidden");
+        } else current.classList.add("hidden");
+        updateTreeSelection();
+      }
+
+      function clearConsole() {
+        state.consoleCount = 0;
+        $("#console-entries").replaceChildren();
+        $("#console-empty").classList.remove("hidden");
+        $("#error-count").classList.add("hidden");
+      }
+
+      function appendConsole(type, message, source = "") {
+        const row = document.createElement("div");
+        row.className = `console-entry ${type === "error" ? "entry-error" : type === "warn" ? "entry-warn" : "entry-info"}`;
+        const marker = document.createElement("span");
+        marker.className = "entry-marker";
+        marker.textContent = type === "error" ? "!" : type === "warn" ? "△" : "i";
+        const body = document.createElement("span");
+        body.className = "entry-message";
+        body.textContent = message;
+        row.append(marker, body);
+        if (source) {
+          const location = document.createElement("span");
+          location.className = "entry-source";
+          location.textContent = source;
+          row.append(location);
+        }
+        $("#console-entries").append(row);
+        $("#console-empty").classList.add("hidden");
+        if (type === "error") {
+          state.consoleCount += 1;
+          const count = $("#error-count");
+          count.textContent = String(state.consoleCount);
+          count.classList.remove("hidden");
+        }
+      }
+
+      function escapeAttribute(value) {
+        return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+      }
+
+      function bytesToBase64(bytes) {
+        let binary = "";
+        for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+          binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+        }
+        return btoa(binary);
+      }
+
+      async function prepareStylesheets() {
+        const cssFiles = [...state.files.entries()].filter(([path]) => /\.css$/i.test(path));
+        state.cssSources.clear();
+        for (const [path, file] of state.files) {
+          const bytes = new Uint8Array(await file.arrayBuffer());
+          state.assetUrls.set(path, `data:${mimeType(path)};base64,${bytesToBase64(bytes)}`);
+        }
+        for (const [path, file] of cssFiles) state.cssSources.set(path, await file.text());
+        for (const [path] of cssFiles) {
+          const css = rewriteCss(state.cssSources.get(path), path);
+          state.assetUrls.set(path, `data:text/css;charset=utf-8,${encodeURIComponent(css)}`);
+        }
+      }
+
+      function resolveLocalUrl(raw, parentPath) {
+        const value = raw.trim();
+        if (!value || /^(?:[a-z][a-z\d+.-]*:|\/\/|#|data:|blob:|javascript:|mailto:|tel:)/i.test(value)) return null;
+        const noQuery = value.split(/[?#]/, 1)[0];
+        if (!noQuery) return null;
+        const base = noQuery.startsWith("/") ? "" : parentPath.includes("/") ? parentPath.slice(0, parentPath.lastIndexOf("/") + 1) : "";
+        return normalizePath(`${base}${decodeURIComponent(noQuery.replace(/^\//, ""))}`);
+      }
+
+      function rewriteCss(cssText, cssPath, importStack = new Set()) {
+        const importsRewritten = cssText.replace(/@import\s+(?:url\(\s*)?(["'])(.*?)\1\s*\)?([^;]*);/gi, (whole, quote, raw, media) => {
+          const resolved = resolveLocalUrl(raw, cssPath);
+          const source = resolved && state.cssSources.get(resolved);
+          if (!source || importStack.has(resolved)) return whole;
+          const nextStack = new Set(importStack);
+          nextStack.add(resolved);
+          const nestedCss = rewriteCss(source, resolved, nextStack);
+          return `@import url("data:text/css;charset=utf-8,${encodeURIComponent(nestedCss)}")${media || ""};`;
+        });
+        return importsRewritten.replace(/url\(\s*(?:(["'])(.*?)\1|([^)]*?))\s*\)/gi, (whole, quote, quoted, unquoted) => {
+          const raw = (quoted || unquoted || "").trim();
+          const resolved = resolveLocalUrl(raw, cssPath);
+          const url = resolved && state.files.has(resolved) ? getAssetUrl(resolved) : raw;
+          return `url("${escapeAttribute(url)}")`;
+        });
+      }
+
+      function mapAssetUrl(raw, htmlPath) {
+        const resolved = resolveLocalUrl(raw, htmlPath);
+        return resolved && state.files.has(resolved) ? getAssetUrl(resolved) : raw;
+      }
+
+      async function createPreviewDocument(path) {
+        const file = state.files.get(path);
+        const markup = await file.text();
+        const parsed = new DOMParser().parseFromString(markup, "text/html");
+        for (const element of parsed.querySelectorAll("[src], [poster], [href], [xlink\\:href]")) {
+          const attr = element.hasAttribute("src") ? "src"
+            : element.hasAttribute("poster") ? "poster"
+            : element.hasAttribute("xlink:href") ? "xlink:href" : "href";
+          const raw = element.getAttribute(attr);
+          if (!raw) continue;
+          if (element.tagName.toLowerCase() === "a" && !element.hasAttribute("download")) {
+            const destination = resolveLocalUrl(raw, path);
+            if (destination && isHtml(destination) && state.files.has(destination)) {
+              element.setAttribute("href", `#html-viewer:${encodeURIComponent(destination)}`);
+              element.setAttribute("data-viewer-page", destination);
+            }
+            continue;
+          }
+          if (attr === "href" && element.tagName.toLowerCase() === "link" && !/stylesheet|icon|preload|modulepreload/i.test(element.getAttribute("rel") || "")) continue;
+          const mapped = mapAssetUrl(raw, path);
+          if (mapped !== raw) element.setAttribute(attr, mapped);
+        }
+
+        for (const style of parsed.querySelectorAll("style")) style.textContent = rewriteCss(style.textContent, path);
+        for (const element of parsed.querySelectorAll("[style]")) element.setAttribute("style", rewriteCss(element.getAttribute("style"), path));
+
+        const bridge = parsed.createElement("script");
+        bridge.textContent = `
+          (() => {
+            const report = (type, message, source) => parent.postMessage({ __htmlViewer: true, type, message: String(message), source: source || "" }, "*");
+            window.addEventListener("error", event => {
+              if (event.target && event.target !== window) {
+                const target = event.target;
+                report("error", "No se pudo cargar el recurso: " + (target.src || target.href || target.currentSrc || target.tagName), location.pathname);
+              } else report("error", event.message || "Error de JavaScript", event.filename ? event.filename + ":" + event.lineno : "");
+            }, true);
+            window.addEventListener("unhandledrejection", event => report("error", "Promesa rechazada: " + (event.reason && event.reason.message || event.reason), ""));
+            const originalError = console.error.bind(console);
+            console.error = (...args) => { report("error", args.map(value => typeof value === "string" ? value : (() => { try { return JSON.stringify(value); } catch { return String(value); } })()).join(" "), "console.error"); originalError(...args); };
+            const originalWarn = console.warn.bind(console);
+            console.warn = (...args) => { report("warn", args.map(value => String(value)).join(" "), "console.warn"); originalWarn(...args); };
+            document.addEventListener("click", event => {
+              const link = event.target.closest && event.target.closest("a[data-viewer-page]");
+              if (!link) return;
+              event.preventDefault();
+              parent.postMessage({ __htmlViewer: true, type: "navigate", path: link.getAttribute("data-viewer-page") }, "*");
+            }, true);
+          })();
+        `;
+        parsed.head.insertBefore(bridge, parsed.head.firstChild);
+        const base = parsed.createElement("base");
+        base.href = "about:srcdoc";
+        parsed.head.insertBefore(base, parsed.head.firstChild);
+        if (!parsed.head.querySelector('meta[name="viewport"]')) {
+          const viewport = parsed.createElement("meta");
+          viewport.name = "viewport";
+          viewport.content = "width=device-width, initial-scale=1";
+          parsed.head.append(viewport);
+        }
+        return "<!doctype html>\n" + parsed.documentElement.outerHTML;
+      }
+
+      async function runFile(path) {
+        const cleanPath = normalizePath(path);
+        if (!state.files.has(cleanPath) || !isHtml(cleanPath)) {
+          showToast("Selecciona un archivo HTML válido.", true);
+          return;
+        }
+        state.currentPath = cleanPath;
+        updateCurrentFile();
+        clearConsole();
+        $("#empty-state").classList.add("hidden");
+        $("#frame-wrap").classList.remove("hidden");
+        $("#reload-button").disabled = false;
+        $("#open-new-tab-button").disabled = false;
+        $("#preview-stage").classList.add("has-preview");
+        try {
+          await prepareStylesheets();
+          previewFrame.srcdoc = await createPreviewDocument(cleanPath);
+        } catch (error) {
+          appendConsole("error", `No se pudo abrir ${cleanPath}: ${error.message || error}`);
+          showToast("No se pudo preparar la vista previa.", true);
+        }
+      }
+
+      async function openZip(file) {
+        try {
+          const buffer = await file.arrayBuffer();
+          if (typeof DecompressionStream !== "undefined") {
+            try {
+              const entries = await readZipNative(buffer);
+              startProject(entries, file.name.replace(/\.zip$/i, "") || "Proyecto ZIP");
+              return;
+            } catch { /* Use the ZIP library when native decompression cannot read the archive. */ }
+          }
+          if (typeof window.JSZip === "undefined") await loadZipLibrary();
+          const archive = await window.JSZip.loadAsync(buffer);
+          const entries = [];
+          for (const [path, entry] of Object.entries(archive.files)) {
+            if (entry.dir) continue;
+            const blob = await entry.async("blob");
+            entries.push(new File([blob], path.split("/").pop() || path, { type: mimeType(path) }));
+            Object.defineProperty(entries[entries.length - 1], "webkitRelativePath", { value: path });
+          }
+          startProject(entries, file.name.replace(/\.zip$/i, "") || "Proyecto ZIP");
+        } catch (error) {
+          console.error(error);
+          showToast(`No se pudo abrir el ZIP: ${error.message || error}`, true);
+        }
+      }
+
+      async function readZipNative(buffer) {
+        const bytes = new Uint8Array(buffer);
+        const view = new DataView(buffer);
+        let eocd = -1;
+        for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 65557); i--) {
+          if (view.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+        }
+        if (eocd < 0) throw new Error("El archivo ZIP no tiene un directorio válido.");
+        const total = view.getUint16(eocd + 10, true);
+        let cursor = view.getUint32(eocd + 16, true);
+        const entries = [];
+        const decoder = new TextDecoder();
+        for (let index = 0; index < total; index++) {
+          if (view.getUint32(cursor, true) !== 0x02014b50) throw new Error("Estructura ZIP no compatible.");
+          const method = view.getUint16(cursor + 10, true);
+          const compressedSize = view.getUint32(cursor + 20, true);
+          const nameLength = view.getUint16(cursor + 28, true);
+          const extraLength = view.getUint16(cursor + 30, true);
+          const commentLength = view.getUint16(cursor + 32, true);
+          const localOffset = view.getUint32(cursor + 42, true);
+          const name = decoder.decode(bytes.slice(cursor + 46, cursor + 46 + nameLength));
+          cursor += 46 + nameLength + extraLength + commentLength;
+          if (name.endsWith("/")) continue;
+          const localNameLength = view.getUint16(localOffset + 26, true);
+          const localExtraLength = view.getUint16(localOffset + 28, true);
+          const dataStart = localOffset + 30 + localNameLength + localExtraLength;
+          const compressed = bytes.slice(dataStart, dataStart + compressedSize);
+          let data;
+          if (method === 0) data = compressed;
+          else if (method === 8 && typeof DecompressionStream !== "undefined") {
+            const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+            data = new Uint8Array(await new Response(stream).arrayBuffer());
+          } else throw new Error(`Método de compresión no compatible (${method}).`);
+          const file = new File([data], name.split("/").pop() || name, { type: mimeType(name) });
+          Object.defineProperty(file, "webkitRelativePath", { value: name });
+          entries.push(file);
+        }
+        return entries;
+      }
+
+      function mimeType(path) {
+        const ext = path.split(".").pop().toLowerCase();
+        return ({
+          html: "text/html", htm: "text/html", css: "text/css", js: "text/javascript", mjs: "text/javascript",
+          json: "application/json", svg: "image/svg+xml", png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg",
+          gif: "image/gif", webp: "image/webp", avif: "image/avif", ico: "image/x-icon", woff: "font/woff",
+          woff2: "font/woff2", ttf: "font/ttf", otf: "font/otf", mp4: "video/mp4", mp3: "audio/mpeg"
+        })[ext] || "application/octet-stream";
+      }
+
+      function loadZipLibrary() {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
+          script.onload = resolve;
+          script.onerror = () => reject(new Error("No se pudo cargar el lector ZIP. Comprueba tu conexión e inténtalo de nuevo."));
+          document.head.append(script);
+        });
+      }
+
+      function resetProject() {
+        clearAssetUrls();
+        state.files.clear();
+        state.cssSources.clear();
+        state.currentPath = "";
+        state.projectName = "";
+        previewFrame.srcdoc = "";
+        $("#project-panel").classList.add("hidden");
+        $("#drop-zone").classList.remove("hidden");
+        $("#clear-button").disabled = true;
+        $("#reload-button").disabled = true;
+        $("#open-new-tab-button").disabled = true;
+        $("#frame-wrap").classList.add("hidden");
+        $("#empty-state").classList.remove("hidden");
+        $("#preview-stage").classList.remove("has-preview");
+        updateCurrentFile();
+        clearConsole();
+      }
+
+      function importInputFiles(files, name) {
+        const list = [...files];
+        if (!list.length) return;
+        const html = list.find((file) => isHtml(relativePath(file)));
+        startProject(list, name, html ? relativePath(html) : "");
+      }
+
+      $("#open-html-button").addEventListener("click", () => htmlInput.click());
+      $("#empty-open-button").addEventListener("click", () => htmlInput.click());
+      $("#open-folder-button").addEventListener("click", () => folderInput.click());
+      $("#open-zip-button").addEventListener("click", () => zipInput.click());
+      $("#add-files-button").addEventListener("click", () => addInput.click());
+      $("#clear-button").addEventListener("click", resetProject);
+      $("#refresh-tree-button").addEventListener("click", renderTree);
+      $("#reload-button").addEventListener("click", () => state.currentPath && runFile(state.currentPath));
+      $("#clear-console-button").addEventListener("click", clearConsole);
+
+      htmlInput.addEventListener("change", () => {
+        const file = htmlInput.files && htmlInput.files[0];
+        if (file) startProject([file], file.name, file.name);
+        htmlInput.value = "";
+      });
+      folderInput.addEventListener("change", () => {
+        importInputFiles(folderInput.files, folderInput.files && folderInput.files[0] ? relativePath(folderInput.files[0]).split("/")[0] : "Proyecto");
+        folderInput.value = "";
+      });
+      zipInput.addEventListener("change", () => {
+        const file = zipInput.files && zipInput.files[0];
+        if (file) openZip(file);
+        zipInput.value = "";
+      });
+      addInput.addEventListener("change", () => {
+        const incoming = [...(addInput.files || [])];
+        if (incoming.length) {
+          const existing = new Map(state.files);
+          for (const file of incoming) existing.set(relativePath(file), file);
+          const preferred = state.currentPath;
+          startProject([...existing.entries()].map(([path, file]) => {
+            if (file.webkitRelativePath) return file;
+            Object.defineProperty(file, "webkitRelativePath", { value: path, configurable: true });
+            return file;
+          }), state.projectName || "Proyecto", preferred);
+        }
+        addInput.value = "";
+      });
+
+      const dropZone = $("#drop-zone");
+      for (const eventName of ["dragenter", "dragover"]) {
+        dropZone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropZone.classList.add("dragging");
+        });
+      }
+      for (const eventName of ["dragleave", "drop"]) {
+        dropZone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropZone.classList.remove("dragging");
+        });
+      }
+      dropZone.addEventListener("drop", (event) => {
+        const files = [...(event.dataTransfer && event.dataTransfer.files || [])];
+        const zip = files.find((file) => /\.zip$/i.test(file.name));
+        if (zip) openZip(zip);
+        else if (files.length) importInputFiles(files, "Proyecto");
+      });
+
+      window.addEventListener("message", (event) => {
+        if (event.source !== previewFrame.contentWindow || !event.data || event.data.__htmlViewer !== true) return;
+        const data = event.data;
+        if (data.type === "navigate") {
+          runFile(data.path);
+          return;
+        }
+        appendConsole(data.type || "info", data.message || "Error desconocido", data.source || "");
+      });
+
+      for (const button of document.querySelectorAll(".device-button")) {
+        button.addEventListener("click", () => {
+          for (const other of document.querySelectorAll(".device-button")) other.classList.toggle("active", other === button);
+          $("#frame-wrap").classList.remove("device-mobile", "device-tablet", "device-desktop");
+          $("#frame-wrap").classList.add(`device-${button.dataset.device}`);
+        });
+      }
+
+      $("#console-toggle").addEventListener("click", () => {
+        const panel = $("#console-panel");
+        const collapsed = panel.classList.toggle("collapsed");
+        $("#console-toggle").setAttribute("aria-label", collapsed ? "Expandir consola" : "Contraer consola");
+        $("#console-toggle").title = collapsed ? "Expandir consola" : "Contraer consola";
+        $("#console-toggle").querySelector("svg").style.transform = collapsed ? "rotate(180deg)" : "";
+      });
+
+      $("#open-new-tab-button").addEventListener("click", async () => {
+        if (!state.currentPath) return;
+        try {
+          const html = await createPreviewDocument(state.currentPath);
+          const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+          window.open(url, "_blank", "noopener");
+          window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+        } catch (error) {
+          showToast(`No se pudo abrir otra pestaña: ${error.message || error}`, true);
+        }
+      });
+
+      const helpDialog = $("#help-dialog");
+      $("#help-button").addEventListener("click", () => helpDialog.showModal());
+      $("#close-help-button").addEventListener("click", () => helpDialog.close());
+      $("#done-help-button").addEventListener("click", () => helpDialog.close());
+      helpDialog.addEventListener("click", (event) => {
+        if (event.target === helpDialog) helpDialog.close();
+      });
+
+    })();
+  </script>
+</body>
+</html>
