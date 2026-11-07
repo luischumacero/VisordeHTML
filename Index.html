@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f6f7fb">
+  <meta name="theme-color" content="#0b1420">
   <title>HTML Viewer</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -102,6 +102,9 @@
             <button class="icon-button toolbar-icon" id="open-new-tab-button" type="button" aria-label="Abrir vista previa en otra pestaña" title="Abrir en otra pestaña" disabled>
               <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M11 3h6v6m-.5-5.5L9 11m4-1v5.5a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
+            <button class="icon-button toolbar-icon" id="fullscreen-button" type="button" aria-label="Abrir documento a pantalla completa" title="Pantalla completa (Esc para salir)" aria-pressed="false" disabled>
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 3H3v4m0-4 5 5m5-5h4v4m0-4-5 5M3 13v4h4m-4 0 5-5m5 5h4v-4m0 4-5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
           </div>
         </div>
 
@@ -125,7 +128,7 @@
             <span class="empty-footnote">100% local · Sin registro ni cargas a servidores</span>
           </div>
           <div class="frame-wrap device-desktop hidden" id="frame-wrap">
-            <iframe id="preview-frame" title="Vista previa del proyecto" sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock" referrerpolicy="no-referrer"></iframe>
+            <iframe id="preview-frame" title="Vista previa del proyecto" sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock" allow="fullscreen" referrerpolicy="no-referrer"></iframe>
           </div>
         </div>
 
@@ -189,6 +192,7 @@
       const addInput = $("#add-input");
       const fileTree = $("#file-tree");
       const previewFrame = $("#preview-frame");
+      const fullscreenButton = $("#fullscreen-button");
 
       function showToast(message, isError = false) {
         const toast = $("#toast");
@@ -521,6 +525,7 @@
         $("#frame-wrap").classList.remove("hidden");
         $("#reload-button").disabled = false;
         $("#open-new-tab-button").disabled = false;
+        fullscreenButton.disabled = false;
         $("#preview-stage").classList.add("has-preview");
         try {
           await prepareStylesheets();
@@ -629,6 +634,7 @@
         $("#clear-button").disabled = true;
         $("#reload-button").disabled = true;
         $("#open-new-tab-button").disabled = true;
+        fullscreenButton.disabled = true;
         $("#frame-wrap").classList.add("hidden");
         $("#empty-state").classList.remove("hidden");
         $("#preview-stage").classList.remove("has-preview");
@@ -652,6 +658,27 @@
       $("#refresh-tree-button").addEventListener("click", renderTree);
       $("#reload-button").addEventListener("click", () => state.currentPath && runFile(state.currentPath));
       $("#clear-console-button").addEventListener("click", clearConsole);
+      fullscreenButton.addEventListener("click", async () => {
+        try {
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+            return;
+          }
+          if (typeof previewFrame.requestFullscreen !== "function") {
+            showToast("Tu navegador no admite la vista a pantalla completa.", true);
+            return;
+          }
+          await previewFrame.requestFullscreen();
+        } catch (error) {
+          showToast(`No se pudo abrir la pantalla completa: ${error.message || error}`, true);
+        }
+      });
+      document.addEventListener("fullscreenchange", () => {
+        const isFullscreen = document.fullscreenElement === previewFrame;
+        fullscreenButton.setAttribute("aria-pressed", String(isFullscreen));
+        fullscreenButton.setAttribute("aria-label", isFullscreen ? "Salir de pantalla completa" : "Abrir documento a pantalla completa");
+        fullscreenButton.title = isFullscreen ? "Salir de pantalla completa (Esc)" : "Pantalla completa (Esc para salir)";
+      });
 
       htmlInput.addEventListener("change", () => {
         const file = htmlInput.files && htmlInput.files[0];
